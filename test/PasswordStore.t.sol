@@ -16,6 +16,8 @@ contract PasswordStoreTest is Test {
         owner = msg.sender;
     }
 
+    // This test should pass to ensure the contract owner is able to change the password.
+
     function test_owner_can_set_password() public {
         vm.startPrank(owner);
         string memory expectedPassword = "myNewPassword";
@@ -23,6 +25,21 @@ contract PasswordStoreTest is Test {
         string memory actualPassword = passwordStore.getPassword();
         assertEq(actualPassword, expectedPassword);
     }
+
+    // This test should pass to ensure a non-owner address cannot set the password.
+
+    function test_non_owner_cannot_set_password() public {
+        vm.startPrank(address(1));
+        string memory expectedPassword = "myReallyNewPassword";
+        passwordStore.setPassword(expectedPassword);
+        vm.stopPrank();
+
+        vm.startPrank(owner);
+        string memory actualPassword = passwordStore.getPassword();
+        assertTrue(keccak256(abi.encodePacked(actualPassword)) != keccak256(abi.encodePacked(expectedPassword)));
+    }
+
+    // This test should pass to ensure a non-owner address cannot read the password.
 
     function test_non_owner_reading_password_reverts() public {
         vm.startPrank(address(1));
